@@ -32,8 +32,8 @@ if [ ! -f "$CONFIG_FILE" ]; then
 # Show a visual progress bar alongside the countdown (0 = off, 1 = on)
 # SHOW_BAR=0
 
-# Width of the progress bar in characters (default: 30)
-# BAR_WIDTH=30
+# Width of the progress bar in characters (default: 10)
+# BAR_WIDTH=10
 
 # Show ANSI colors — green for HOT, blue for COLD. Requires a color-capable terminal. (default: 0)
 # SHOW_COLOR=0

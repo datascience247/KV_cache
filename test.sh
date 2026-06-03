@@ -74,6 +74,22 @@ else
   (( FAIL++ )) || true
 fi
 
+# ── Partial block test ────────────────────────────────────────────────────────
+
+tmp_bar=$(mktemp)
+echo $(( $(date +%s) - 155 )) > "$tmp_bar"   # ~145s remaining, mid-block territory
+partial_out=$(NO_COLOR=1 CONFIG_FILE=/dev/null TS_FILE="$tmp_bar" TTL=300 SHOW_BAR=1 BAR_WIDTH=10 bash "$SCRIPT" 2>&1 || true)
+rm -f "$tmp_bar"
+if [[ "$partial_out" == *"▏"* ]] || [[ "$partial_out" == *"▎"* ]] || [[ "$partial_out" == *"▍"* ]] || \
+   [[ "$partial_out" == *"▌"* ]] || [[ "$partial_out" == *"▋"* ]] || [[ "$partial_out" == *"▊"* ]] || \
+   [[ "$partial_out" == *"▉"* ]]; then
+  echo "PASS show_bar_partial_block"
+  (( PASS++ )) || true
+else
+  echo "FAIL show_bar_partial_block: no partial block in '$partial_out'"
+  (( FAIL++ )) || true
+fi
+
 # ── Color tests ───────────────────────────────────────────────────────────────
 
 # SHOW_COLOR=1 HOT output contains ANSI escape sequence

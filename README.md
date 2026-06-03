@@ -55,8 +55,8 @@ Restart Claude Code. The status line updates every second.
 # Show a visual progress bar (default: 0)
 # SHOW_BAR=0
 
-# Width of the progress bar in characters (default: 30)
-# BAR_WIDTH=30
+# Width of the progress bar in characters (default: 10)
+# BAR_WIDTH=10
 
 # Show ANSI colors — orange for HOT, blue for COLD (default: 0)
 # SHOW_COLOR=0

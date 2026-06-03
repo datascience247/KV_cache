@@ -20,7 +20,7 @@ A lightweight status-line widget installed into Claude Code that displays a live
 8. As a user, I want the notification sentinel to clear when I send a new message, so that the next cooling cycle can notify me again.
 9. As a user, I want an optional visual progress bar (`[████████░░]`), so that I can gauge urgency at a glance without reading the clock.
 10. As a user, I want optional ANSI color (orange for HOT, blue for COLD) via `SHOW_COLOR=1`, so that cache state is immediately visible at a glance. The `NO_COLOR` environment variable suppresses color output when set.
-11. As a user, I want to configure the progress bar width via `BAR_WIDTH`, so that I can tune how smoothly the bar counts down (default 30 — each block ≈ 10s at standard TTL).
+11. As a user, I want to configure the progress bar width via `BAR_WIDTH`, so that I can tune how smoothly the bar counts down. The bar uses fractional Unicode block characters (▏▎▍▌▋▊▉█) giving 8 sub-steps per block — default width 10 moves every ~3.75s at standard TTL.
 10. As a user, I want to configure the TTL, notification threshold, and progress bar via a config file, so that I can tune the widget without editing the script.
 11. As a user, I want environment variables to override config-file values, so that I can test or temporarily override settings without touching files.
 12. As a developer, I want stale session files cleaned up automatically, so that my home directory doesn't accumulate leftover timestamp files from old sessions.
