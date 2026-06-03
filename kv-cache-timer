@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+session="${CLAUDE_CODE_SESSION_ID:-default}"
+
+# Load user config (CONFIG_FILE env var can override; /dev/null disables it)
+CONFIG_FILE="${CONFIG_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/kv-cache-timer/config.sh}"
+[ -f "$CONFIG_FILE" ] && source "$CONFIG_FILE"
+
+# Defaults — env vars take priority over config file values
+TS_FILE="${TS_FILE:-$HOME/.claude_cache_ts_${session}}"
+NOTIFY_FILE="${NOTIFY_FILE:-$HOME/.claude_cache_notified_${session}}"
+TTL="${TTL:-300}"
+SHOW_BAR="${SHOW_BAR:-0}"
+NOTIFY_THRESHOLD="${NOTIFY_THRESHOLD:-60}"
+SHOW_COLOR="${SHOW_COLOR:-0}"
+if [ "${SHOW_COLOR}" = "1" ] && [ -z "${NO_COLOR:-}" ]; then
+  C_HOT="\033[32m"; C_COLD="\033[34m"; C_RESET="\033[0m"
+else
+  C_HOT=""; C_COLD=""; C_RESET=""
+fi
+
+[ ! -f "$TS_FILE" ] && printf "${C_COLD}❄ COLD${C_RESET}\n" && exit 0
+
+last=$(cat "$TS_FILE")
+last="${last//[[:space:]]/}"
+if ! [[ "$last" =~ ^[0-9]+$ ]]; then
+  printf "${C_COLD}❄ COLD${C_RESET}\n"
+  exit 0
+fi
+
+now=$(date +%s)
+remaining=$(( TTL - (now - last) ))
+[ "$remaining" -gt "$TTL" ] && remaining=$TTL
+
+if [ "$remaining" -le 0 ]; then
+  printf "${C_COLD}❄ COLD${C_RESET}\n"
+  exit 0
+fi
+
+# Desktop notification when crossing into warning zone — fires once per cooling cycle
+if [ "${NOTIFY_THRESHOLD}" -gt 0 ] && [ "$remaining" -le "${NOTIFY_THRESHOLD}" ] && [ ! -f "$NOTIFY_FILE" ]; then
+  touch "$NOTIFY_FILE"
+  if command -v notify-send &>/dev/null; then
+    notify-send -u normal "KV Cache" "Cache expires in ~${remaining}s" >/dev/null 2>&1 &
+  elif command -v terminal-notifier &>/dev/null; then
+    terminal-notifier -title "KV Cache" -message "Cache expires in ~${remaining}s" >/dev/null 2>&1 &
+  elif [[ "$OSTYPE" == darwin* ]]; then
+    osascript -e "display notification \"Cache expires in ~${remaining}s\" with title \"KV Cache\"" >/dev/null 2>&1 &
+  fi
+fi
+
+mins=$(( remaining / 60 ))
+secs=$(( remaining % 60 ))
+time_str=$(printf "%d:%02d" "$mins" "$secs")
+
+if [ "${SHOW_BAR}" = "1" ]; then
+  filled=$(( remaining * 10 / TTL ))
+  [ "$filled" -gt 10 ] && filled=10
+  bar=""
+  for (( i=0; i<10; i++ )); do
+    if [ "$i" -lt "$filled" ]; then bar+="█"; else bar+="░"; fi
+  done
+  printf "${C_HOT}🔥 HOT [${bar}] ${time_str}${C_RESET}\n"
+else
+  printf "${C_HOT}🔥 HOT ${time_str}${C_RESET}\n"
+fi
