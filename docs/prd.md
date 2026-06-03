@@ -19,7 +19,8 @@ A lightweight status-line widget installed into Claude Code that displays a live
 7. As a user, I want the notification to fire only once per cooling cycle, so that I am not spammed with repeated alerts.
 8. As a user, I want the notification sentinel to clear when I send a new message, so that the next cooling cycle can notify me again.
 9. As a user, I want an optional visual progress bar (`[████████░░]`), so that I can gauge urgency at a glance without reading the clock.
-10. As a user, I want optional ANSI color (green for HOT, blue for COLD) via `SHOW_COLOR=1`, so that cache state is immediately visible at a glance. The `NO_COLOR` environment variable suppresses color output when set.
+10. As a user, I want optional ANSI color (orange for HOT, blue for COLD) via `SHOW_COLOR=1`, so that cache state is immediately visible at a glance. The `NO_COLOR` environment variable suppresses color output when set.
+11. As a user, I want to configure the progress bar width via `BAR_WIDTH`, so that I can tune how smoothly the bar counts down (default 30 — each block ≈ 10s at standard TTL).
 10. As a user, I want to configure the TTL, notification threshold, and progress bar via a config file, so that I can tune the widget without editing the script.
 11. As a user, I want environment variables to override config-file values, so that I can test or temporarily override settings without touching files.
 12. As a developer, I want stale session files cleaned up automatically, so that my home directory doesn't accumulate leftover timestamp files from old sessions.
@@ -37,7 +38,7 @@ A lightweight status-line widget installed into Claude Code that displays a live
 
 - **Future timestamp capped at TTL** — if the system clock skews backward between hook write and timer read, `remaining` is clamped to `TTL` before display, preventing misleading "HOT 15:00" output.
 
-- **ANSI color codes** — Claude Code's status line renders standard 8-color ANSI escape sequences (e.g. `\033[32m`). 24-bit truecolor is unreliable (broken in v2.1.78+). Consecutive separate sequences must be combined (`\e[42;30m` not `\e[42m\e[30m`). Color output is opt-in via `SHOW_COLOR=1`; default is plain text for maximum compatibility. **Status: unverified in live status bar** — confirmed the script emits correct ANSI codes, but rendering in Claude Code's actual status line has not been end-to-end tested.
+- **ANSI color codes** — HOT uses 256-color orange (`\033[38;5;208m`); COLD uses 8-color blue (`\033[34m`). 24-bit truecolor is avoided (broken in v2.1.78+). 256-color is distinct from truecolor and is widely supported in modern terminals. Color is opt-in via `SHOW_COLOR=1`; default is plain text for maximum compatibility. Fallback if 256-color fails in status bar: use `\033[33m` (yellow, 8-color). **Status: unverified in live status bar** — script emits correct ANSI codes but rendering in Claude Code's actual status line has not been end-to-end confirmed.
 
 - **`refreshInterval: 1` in `settings.json`** — the status line re-runs every second. This field is documented in Claude Code's public spec and is the recommended approach for time-based status displays.
 
