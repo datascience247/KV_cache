@@ -7,8 +7,19 @@ on:
     branches: ["**"]
 
 jobs:
-  test:
+  shellcheck:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint shell scripts
+        run: shellcheck kv-cache-timer kv-cache-timer-hook install.sh uninstall.sh test.sh
+
+  test:
+    needs: shellcheck
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - name: Run test suite

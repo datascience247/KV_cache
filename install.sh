@@ -35,7 +35,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
 # Width of the progress bar in characters (default: 10)
 # BAR_WIDTH=10
 
-# Show ANSI colors — green for HOT, blue for COLD. Requires a color-capable terminal. (default: 0)
+# Show ANSI colors — orange for HOT, blue for COLD. Requires a color-capable terminal. (default: 0)
 # SHOW_COLOR=0
 CONF
   echo "  Config template → $CONFIG_FILE"

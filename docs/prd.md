@@ -65,6 +65,14 @@ A good test exercises the external behavior of the timer script — what it prin
 - Remote or push-based timestamp updates — the polling/file approach is sufficient; sockets or named pipes are not needed.
 - Windows support — the widget targets Bash environments (Linux, macOS, WSL).
 
+## Future Features
+
+- **Notification tool auto-install** — detect missing `notify-send` / `terminal-notifier` and prompt user to install via package manager, or offer fallback notifications via echo/logger.
+- **Improve notification UX** — richer notification messages with action buttons, sound option, or repeated reminders if user dismisses the first alert.
+- **Alternative notification backends** — syslog, journal, or system tray support for environments where desktop notifications are unavailable.
+- **PreToolUse hook support** — reset timer when Claude invokes tools, not just on user input, for more accurate tracking in tool-heavy workflows.
+- **Stats/analytics** — track how often cache hits, average session length, total tokens saved to help users optimize workflow.
+
 ## Further Notes
 
 The 5-minute TTL is determined by Anthropic. The `TTL` config option only affects the display; it cannot extend the actual cache lifetime. If Anthropic changes the TTL, the default in the script should be updated to match.

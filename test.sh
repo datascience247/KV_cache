@@ -8,6 +8,7 @@ FAIL=0
 
 check() {
   local name="$1" expected_pattern="$2" actual="$3"
+  # shellcheck disable=SC2053
   if [[ "$actual" == $expected_pattern ]]; then
     echo "PASS $name"
     (( PASS++ )) || true
@@ -39,7 +40,7 @@ run() {
     actual=$(NO_COLOR=1 CONFIG_FILE=/dev/null TS_FILE="$tmp" TTL="$ttl" bash "$SCRIPT" 2>&1 || true)
     rm -f "$tmp"
   else
-    echo $(( $(date +%s) + ts_offset )) > "$tmp"
+    echo "$(( $(date +%s) + ts_offset ))" > "$tmp"
     actual=$(NO_COLOR=1 CONFIG_FILE=/dev/null TS_FILE="$tmp" TTL="$ttl" bash "$SCRIPT" 2>&1 || true)
     rm -f "$tmp"
   fi
@@ -63,10 +64,10 @@ run "future_timestamp"         "🔥 HOT 5:*"   $(( +600 ))
 # ── Progress bar test ──────────────────────────────────────────────────────────
 
 tmp_bar=$(mktemp)
-echo $(( $(date +%s) )) > "$tmp_bar"
+echo "$(date +%s)" > "$tmp_bar"
 bar_out=$(NO_COLOR=1 CONFIG_FILE=/dev/null TS_FILE="$tmp_bar" TTL=300 SHOW_BAR=1 bash "$SCRIPT" 2>&1 || true)
 rm -f "$tmp_bar"
-if [[ "$bar_out" == *"[█"*"]"* ]] || [[ "$bar_out" == *"[ "*"]"* ]]; then
+if [[ "$bar_out" == "🔥 HOT ["*"]"* ]]; then
   echo "PASS show_bar_enabled"
   (( PASS++ )) || true
 else
@@ -77,7 +78,8 @@ fi
 # ── Partial block test ────────────────────────────────────────────────────────
 
 tmp_bar=$(mktemp)
-echo $(( $(date +%s) - 155 )) > "$tmp_bar"   # ~145s remaining, mid-block territory
+# 166s elapsed → ~134s remaining; chosen to avoid full-block boundaries at multiples of 30s
+echo "$(( $(date +%s) - 166 ))" > "$tmp_bar"
 partial_out=$(NO_COLOR=1 CONFIG_FILE=/dev/null TS_FILE="$tmp_bar" TTL=300 SHOW_BAR=1 BAR_WIDTH=10 bash "$SCRIPT" 2>&1 || true)
 rm -f "$tmp_bar"
 if [[ "$partial_out" == *"▏"* ]] || [[ "$partial_out" == *"▎"* ]] || [[ "$partial_out" == *"▍"* ]] || \
@@ -180,6 +182,43 @@ else
   (( FAIL++ )) || true
 fi
 rm -f "$tmp_sentinel" "$(dirname "$tmp_ts")/.claude_cache_ts_test_sentinel_$$"
+
+# NOTIFY_THRESHOLD=0 disables notifications — sentinel must not be created
+tmp_ts=$(mktemp)
+tmp_notify=$(mktemp)
+rm -f "$tmp_notify"
+echo "$(( $(date +%s) - 260 ))" > "$tmp_ts"   # 40s remaining — within default threshold
+NO_COLOR=1 CONFIG_FILE=/dev/null TS_FILE="$tmp_ts" TTL=300 NOTIFY_FILE="$tmp_notify" NOTIFY_THRESHOLD=0 bash "$SCRIPT" >/dev/null 2>&1 || true
+if [ ! -f "$tmp_notify" ]; then
+  echo "PASS notify_disabled_when_threshold_zero"
+  (( PASS++ )) || true
+else
+  echo "FAIL notify_disabled_when_threshold_zero: sentinel created despite NOTIFY_THRESHOLD=0"
+  (( FAIL++ )) || true
+fi
+rm -f "$tmp_ts" "$tmp_notify"
+
+# Hook cleans stale session files older than the configured TTL
+tmp_home=$(mktemp -d)
+stale_ts="$tmp_home/.claude_cache_ts_stale_$$"
+stale_notify="$tmp_home/.claude_cache_notified_stale_$$"
+touch "$stale_ts" "$stale_notify"
+python3 - "$stale_ts" "$stale_notify" <<'PYEOF'
+import os, sys, time
+ago = time.time() - 7200
+for f in sys.argv[1:]:
+    os.utime(f, (ago, ago))
+PYEOF
+CLAUDE_CODE_SESSION_ID="new_session_$$" HOME="$tmp_home" TTL=300 \
+  bash "$HOOK" >/dev/null 2>&1 || true
+if [ ! -f "$stale_ts" ] && [ ! -f "$stale_notify" ]; then
+  echo "PASS hook_cleans_stale_files"
+  (( PASS++ )) || true
+else
+  echo "FAIL hook_cleans_stale_files: stale files not removed"
+  (( FAIL++ )) || true
+fi
+rm -rf "$tmp_home"
 
 # ── Summary ────────────────────────────────────────────────────────────────────
 echo

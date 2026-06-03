@@ -1,6 +1,6 @@
 # kv-cache-timer
 
-![Tests](https://github.com/datascience247/kv-cache-timer/actions/workflows/test.yml/badge.svg)
+![Tests](https://github.com/datascience247/KV_cache/actions/workflows/test.yml/badge.svg)
 
 Shows Anthropic's KV (prompt) cache countdown in your Claude Code status line, with optional desktop notifications.
 
@@ -30,8 +30,8 @@ Anthropic's prompt cache expires after 5 minutes of inactivity (Pro/API) or 1 ho
 ## Install
 
 ```bash
-git clone https://github.com/datascience247/kv-cache-timer
-cd kv-cache-timer
+git clone https://github.com/datascience247/KV_cache.git
+cd KV_cache
 bash install.sh
 ```
 
@@ -62,7 +62,7 @@ Restart Claude Code. The status line updates every second.
 # SHOW_COLOR=0
 ```
 
-All options can also be set as environment variables, which take priority over the config file.
+All options can also be set as environment variables, which take priority over the config file. Setting `NO_COLOR=1` suppresses ANSI color output regardless of `SHOW_COLOR`.
 
 ## Desktop notifications
 
@@ -114,3 +114,19 @@ This was the pre-1.0 bug where multiple windows shared one timestamp file. Insta
 
 **Notification not appearing**
 Verify the notification tool is installed for your platform (see table above). Test with: `notify-send "test" "hello"` or `terminal-notifier -message "hello"`. Set `NOTIFY_THRESHOLD=290` temporarily to trigger it immediately after install.
+
+## Contributing
+
+Bug reports and pull requests are welcome. To work on the project locally:
+
+```bash
+git clone https://github.com/datascience247/KV_cache.git
+cd KV_cache
+bash test.sh       # run the full test suite (no external dependencies)
+```
+
+All contributions must pass `bash test.sh` and `shellcheck` on the changed scripts.
+
+## License
+
+[MIT](LICENSE)

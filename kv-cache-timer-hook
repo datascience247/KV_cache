@@ -1,11 +1,19 @@
 #!/usr/bin/env bash
 session="${CLAUDE_CODE_SESSION_ID:-default}"
 
+# Load user config (same lookup as the timer script; /dev/null disables it)
+CONFIG_FILE="${CONFIG_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/kv-cache-timer/config.sh}"
+# shellcheck source=/dev/null
+[ -f "$CONFIG_FILE" ] && source "$CONFIG_FILE"
+TTL="${TTL:-300}"
+
 # Clear notification sentinel so the next cooling cycle can notify again
-rm -f "${HOME}/.claude_cache_notified_${session}"
+rm -f "${NOTIFY_FILE:-$HOME/.claude_cache_notified_${session}}"
 
 # Write current timestamp
-date +%s > "${HOME}/.claude_cache_ts_${session}"
+TS_FILE="${TS_FILE:-$HOME/.claude_cache_ts_${session}}"
+date +%s > "$TS_FILE"
 
-# Clean stale files (>60 min old)
-find "${HOME}" -maxdepth 1 \( -name '.claude_cache_ts_*' -o -name '.claude_cache_notified_*' \) -mmin +60 -delete 2>/dev/null || true
+# Clean stale session files older than the configured TTL
+cleanup_min=$(( (TTL + 59) / 60 ))
+find "${HOME}" -maxdepth 1 \( -name '.claude_cache_ts_*' -o -name '.claude_cache_notified_*' \) -mmin +"$cleanup_min" -delete 2>/dev/null || true
