@@ -66,7 +66,7 @@ tmp_bar=$(mktemp)
 echo $(( $(date +%s) )) > "$tmp_bar"
 bar_out=$(NO_COLOR=1 CONFIG_FILE=/dev/null TS_FILE="$tmp_bar" TTL=300 SHOW_BAR=1 bash "$SCRIPT" 2>&1 || true)
 rm -f "$tmp_bar"
-if [[ "$bar_out" == *"[█"*"]"* ]] || [[ "$bar_out" == *"[░"*"]"* ]]; then
+if [[ "$bar_out" == *"[█"*"]"* ]] || [[ "$bar_out" == *"[ "*"]"* ]]; then
   echo "PASS show_bar_enabled"
   (( PASS++ )) || true
 else

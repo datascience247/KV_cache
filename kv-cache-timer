@@ -59,7 +59,7 @@ if [ "${SHOW_BAR}" = "1" ]; then
   [ "$filled_pos" -gt "$total_pos" ] && filled_pos=$total_pos
   full_blocks=$(( filled_pos / 8 ))
   partial=$(( filled_pos % 8 ))
-  partial_chars=("░" "▏" "▎" "▍" "▌" "▋" "▊" "▉")
+  partial_chars=(" " "▏" "▎" "▍" "▌" "▋" "▊" "▉")
   bar=""
   for (( i=0; i<BAR_WIDTH; i++ )); do
     if [ "$i" -lt "$full_blocks" ]; then
@@ -67,7 +67,7 @@ if [ "${SHOW_BAR}" = "1" ]; then
     elif [ "$i" -eq "$full_blocks" ] && [ "$partial" -gt 0 ]; then
       bar+="${partial_chars[$partial]}"
     else
-      bar+="░"
+      bar+=" "
     fi
   done
   printf "${C_HOT}🔥 HOT [${bar}] ${time_str}${C_RESET}\n"
