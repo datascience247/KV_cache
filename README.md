@@ -16,7 +16,7 @@ Anthropic's prompt cache expires after 5 minutes of inactivity (Pro/API) or 1 ho
 ## Features
 
 - **Optional progress bar** — `🔥 HOT [████████░░] 4:23` via `SHOW_BAR=1`
-- **Optional ANSI color** — green for HOT, blue for COLD via `SHOW_COLOR=1`
+- **Optional ANSI color** — green for HOT, blue for COLD via `SHOW_COLOR=1` *(rendering in Claude Code status bar unverified — script emits correct codes)*
 - **Desktop notifications** — get a pop-up when cache is about to expire (Linux, macOS, WSL)
 - **Per-session tracking** — multiple Claude Code windows track their caches independently
 - **Zero runtime deps** — pure Bash; Python 3 only needed for install/uninstall

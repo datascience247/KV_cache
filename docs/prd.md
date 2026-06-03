@@ -37,7 +37,7 @@ A lightweight status-line widget installed into Claude Code that displays a live
 
 - **Future timestamp capped at TTL** — if the system clock skews backward between hook write and timer read, `remaining` is clamped to `TTL` before display, preventing misleading "HOT 15:00" output.
 
-- **ANSI color codes** — Claude Code's status line renders standard 8-color ANSI escape sequences (e.g. `\033[32m`). 24-bit truecolor is unreliable (broken in v2.1.78+). Consecutive separate sequences must be combined (`\e[42;30m` not `\e[42m\e[30m`). Color output is opt-in via `SHOW_COLOR=1`; default is plain text for maximum compatibility.
+- **ANSI color codes** — Claude Code's status line renders standard 8-color ANSI escape sequences (e.g. `\033[32m`). 24-bit truecolor is unreliable (broken in v2.1.78+). Consecutive separate sequences must be combined (`\e[42;30m` not `\e[42m\e[30m`). Color output is opt-in via `SHOW_COLOR=1`; default is plain text for maximum compatibility. **Status: unverified in live status bar** — confirmed the script emits correct ANSI codes, but rendering in Claude Code's actual status line has not been end-to-end tested.
 
 - **`refreshInterval: 1` in `settings.json`** — the status line re-runs every second. This field is documented in Claude Code's public spec and is the recommended approach for time-based status displays.
 
