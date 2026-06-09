@@ -26,17 +26,11 @@ if [ ! -f "$CONFIG_FILE" ]; then
 # Cache TTL in seconds — must match Anthropic's actual TTL (default: 300)
 # TTL=300
 
-# Seconds before expiry to send a desktop notification (0 = disabled)
-# NOTIFY_THRESHOLD=60
-
 # Show a visual progress bar alongside the countdown (0 = off, 1 = on)
 # SHOW_BAR=0
 
 # Width of the progress bar in characters (default: 10)
 # BAR_WIDTH=10
-
-# Show ANSI colors — orange for HOT, blue for COLD. Requires a color-capable terminal. (default: 0)
-# SHOW_COLOR=0
 CONF
   echo "  Config template → $CONFIG_FILE"
 else
@@ -64,7 +58,7 @@ HOOK_ENTRY = {"matcher": "", "hooks": [{"type": "command", "command": HOOK_CMD}]
 if "hooks" not in s:
     s["hooks"] = {}
 
-for event in ["UserPromptSubmit", "Stop"]:
+for event in ["UserPromptSubmit"]:
     entries = s["hooks"].get(event, [])
     # Remove old inline hook if present
     entries = [

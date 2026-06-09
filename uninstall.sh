@@ -10,11 +10,19 @@ echo "Uninstalling kv-cache-timer..."
 rm -f "$INSTALL_DIR/kv-cache-timer" "$INSTALL_DIR/kv-cache-timer-hook"
 echo "  Removed scripts from $INSTALL_DIR"
 
-# Remove timestamp and sentinel files
+# Remove timestamp files (legacy + current)
 # shellcheck disable=SC2086
-count=$(find "${HOME}" -maxdepth 1 \( -name '.claude_cache_ts_*' -o -name '.claude_cache_notified_*' \) 2>/dev/null | wc -l | tr -d ' ')
-find "${HOME}" -maxdepth 1 \( -name '.claude_cache_ts_*' -o -name '.claude_cache_notified_*' \) -delete 2>/dev/null || true
-echo "  Removed $count session file(s)"
+old_count=$(find "${HOME}" -maxdepth 1 -name '.claude_cache_ts_*' 2>/dev/null | wc -l | tr -d ' ')
+find "${HOME}" -maxdepth 1 -name '.claude_cache_ts_*' -delete 2>/dev/null || true
+[ "$old_count" -gt 0 ] && echo "  Removed $old_count legacy session file(s)"
+
+XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+STATE_DIR="${XDG_STATE_HOME}/kv-cache-timer"
+if [ -d "$STATE_DIR" ]; then
+  state_count=$(find "$STATE_DIR" -maxdepth 1 -name 'ts_*' 2>/dev/null | wc -l | tr -d ' ')
+  rm -rf "$STATE_DIR"
+  echo "  Removed $state_count session file(s) from $STATE_DIR"
+fi
 
 # Remove config directory
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/kv-cache-timer"
@@ -36,7 +44,7 @@ with open(path) as f:
 HOOK_CMD = "~/.local/bin/kv-cache-timer-hook"
 
 if "hooks" in s:
-    for event in ["UserPromptSubmit", "Stop"]:
+    for event in ["UserPromptSubmit"]:
         if event in s["hooks"]:
             entries = [
                 e for e in s["hooks"][event]
