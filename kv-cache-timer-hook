@@ -16,7 +16,10 @@ TS_FILE="${TS_FILE:-${CACHE_DIR}/ts_${session}}"
 
 mkdir -p "$CACHE_DIR"
 
-printf '%s' "$(date +%s)" > "$TS_FILE"
+tmp_ts="${TS_FILE}.${$}.tmp"
+printf '%s' "${EPOCHSECONDS:-$(date +%s)}" > "$tmp_ts"
+mv "$tmp_ts" "$TS_FILE"
 
 cleanup_min=$(( (TTL + 59) / 60 ))
-find "$CACHE_DIR" -maxdepth 1 -name 'ts_*' -mmin +"$cleanup_min" -delete 2>/dev/null || true
+(( cleanup_min < 60 )) && cleanup_min=60
+find "$CACHE_DIR" -maxdepth 1 -name 'ts_*' -mmin +"$cleanup_min" -delete >/dev/null 2>&1 &

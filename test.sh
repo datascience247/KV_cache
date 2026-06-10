@@ -20,28 +20,30 @@ check() {
 
 # Run timer with no config file — tests core logic
 run() {
-  local name="$1" expected_pattern="$2" ts_offset="$3" ttl="${4:-300}"
+  local name="$1" expected_pattern="$2" ts_offset="$3" ttl="${4:-300}" bar_width="${5:-}"
   local tmp
   tmp=$(mktemp)
+  local env="CONFIG_FILE=/dev/null TS_FILE=$tmp TTL=$ttl"
+  [ -n "$bar_width" ] && env="$env BAR_WIDTH=$bar_width"
 
   if [ "$ts_offset" = "NOFILE" ]; then
     rm -f "$tmp"
-    actual=$(CONFIG_FILE=/dev/null TS_FILE="$tmp" TTL="$ttl" bash "$SCRIPT" 2>&1 || true)
+    actual=$(eval "$env bash \"$SCRIPT\" 2>&1" || true)
   elif [ "$ts_offset" = "MALFORMED" ]; then
     echo "notanumber" > "$tmp"
-    actual=$(CONFIG_FILE=/dev/null TS_FILE="$tmp" TTL="$ttl" bash "$SCRIPT" 2>&1 || true)
+    actual=$(eval "$env bash \"$SCRIPT\" 2>&1" || true)
     rm -f "$tmp"
   elif [ "$ts_offset" = "EMPTY" ]; then
     : > "$tmp"
-    actual=$(CONFIG_FILE=/dev/null TS_FILE="$tmp" TTL="$ttl" bash "$SCRIPT" 2>&1 || true)
+    actual=$(eval "$env bash \"$SCRIPT\" 2>&1" || true)
     rm -f "$tmp"
   elif [ "$ts_offset" = "WHITESPACE" ]; then
     echo "   " > "$tmp"
-    actual=$(CONFIG_FILE=/dev/null TS_FILE="$tmp" TTL="$ttl" bash "$SCRIPT" 2>&1 || true)
+    actual=$(eval "$env bash \"$SCRIPT\" 2>&1" || true)
     rm -f "$tmp"
   else
     echo "$(( $(date +%s) + ts_offset ))" > "$tmp"
-    actual=$(CONFIG_FILE=/dev/null TS_FILE="$tmp" TTL="$ttl" bash "$SCRIPT" 2>&1 || true)
+    actual=$(eval "$env bash \"$SCRIPT\" 2>&1" || true)
     rm -f "$tmp"
   fi
 
@@ -60,6 +62,7 @@ run "malformed_file"           "❄ COLD"       MALFORMED
 run "empty_file"               "❄ COLD"       EMPTY
 run "whitespace_only"          "❄ COLD"       WHITESPACE
 run "future_timestamp"         "🔥 HOT 5:*"   $(( +600 ))
+run "zero_ttl_cold"            "❄ COLD"       0              0
 
 # ── Progress bar test ──────────────────────────────────────────────────────────
 
@@ -92,6 +95,20 @@ else
   (( FAIL++ )) || true
 fi
 
+# ── Zero-width bar edge case ──────────────────────────────────────────────────
+
+tmp_bar=$(mktemp)
+echo "$(date +%s)" > "$tmp_bar"
+zero_bar_out=$(CONFIG_FILE=/dev/null TS_FILE="$tmp_bar" TTL=300 SHOW_BAR=1 BAR_WIDTH=0 bash "$SCRIPT" 2>&1 || true)
+rm -f "$tmp_bar"
+if [[ "$zero_bar_out" == "🔥 HOT 5:00" ]]; then
+  echo "PASS zero_bar_width_falls_back_to_simple"
+  (( PASS++ )) || true
+else
+  echo "FAIL zero_bar_width_falls_back_to_simple: got '$zero_bar_out'"
+  (( FAIL++ )) || true
+fi
+
 # ── Hook tests ─────────────────────────────────────────────────────────────────
 
 # Hook writes a timestamp file
@@ -120,6 +137,7 @@ os.utime(sys.argv[1], (ago, ago))
 PYEOF
 CLAUDE_CODE_SESSION_ID="new_session_$$" XDG_STATE_HOME="$tmp_home" TTL=300 \
   bash "$HOOK" >/dev/null 2>&1 || true
+sleep 0.2
 if [ ! -f "$stale_ts" ]; then
   echo "PASS hook_cleans_stale_files"
   (( PASS++ )) || true

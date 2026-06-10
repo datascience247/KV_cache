@@ -21,6 +21,8 @@ exit_cold() {
   exit 0
 }
 
+(( TTL <= 0 )) && exit_cold
+
 [[ -f "$TS_FILE" ]] || exit_cold
 
 last=$(< "$TS_FILE")
@@ -28,7 +30,7 @@ last="${last//[[:space:]]/}"
 
 [[ "$last" =~ ^[0-9]+$ ]] || exit_cold
 
-now=$(date +%s)
+now=${EPOCHSECONDS:-$(date +%s)}
 remaining=$(( TTL - (now - last) ))
 
 (( remaining > TTL )) && remaining=$TTL
@@ -38,7 +40,7 @@ mins=$(( remaining / 60 ))
 secs=$(( remaining % 60 ))
 time_str=$(printf "%d:%02d" "$mins" "$secs")
 
-if (( SHOW_BAR == 1 )); then
+if (( SHOW_BAR == 1 && BAR_WIDTH > 0 )); then
   total_pos=$(( BAR_WIDTH * 8 ))
   filled_pos=$(( remaining * total_pos / TTL ))
   (( filled_pos > total_pos )) && filled_pos=$total_pos
