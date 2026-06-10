@@ -1,13 +1,17 @@
 # kv-cache-timer
 
-![Tests](https://github.com/datascience247/KV_cache/actions/workflows/test.yml/badge.svg)
+[![Tests](https://github.com/datascience247/KV_cache/actions/workflows/test.yml/badge.svg)](https://github.com/datascience247/KV_cache/actions/workflows/test.yml)
+[![Shell: Bash](https://img.shields.io/badge/shell-bash%204%2B-89e051?logo=gnubash&logoColor=white)](https://www.gnu.org/software/bash/)
+[![License: MIT](https://img.shields.io/github/license/datascience247/KV_cache)](LICENSE)
 
-> See your Anthropic KV cache countdown in your Claude Code status line.
+> See your Anthropic KV cache countdown live in your Claude Code status line.
 
 ```
-🔥 HOT 4:23   ← cache warm, time remaining
-❄ COLD        ← cache expired or no activity yet
+🔥 HOT [████████░░] 4:23   ← cache warm, time remaining
+❄ COLD                      ← cache expired or no activity yet
 ```
+
+**Contents:** [Why](#why-this-matters) · [Features](#features) · [Install](#install) · [Configuration](#configuration) · [How it works](#how-it-works) · [Troubleshooting](#troubleshooting) · [Contributing](#contributing)
 
 ## Why this matters
 
@@ -34,6 +38,7 @@ kv-cache-timer puts a live countdown in your Claude Code status line. Always kno
 - **Optional progress bar** — `🔥 HOT [████████░░] 4:23` via `SHOW_BAR=1`
 - **Per-session tracking** — multiple Claude Code windows track their caches independently
 - **Zero runtime deps** — pure Bash; Python 3 only needed for install/uninstall
+- **Battle-tested** — 16-test suite covers edge cases (malformed/empty/future timestamps, zero TTL, clock skew); shellcheck-clean and CI-tested on Ubuntu and macOS
 
 > **Terminal only.** The status line appears in Claude Code's terminal interface. It does not render in the VS Code or JetBrains extensions (hooks still fire, but no display — [upstream issue #55643](https://github.com/anthropics/claude-code/issues/55643)).
 

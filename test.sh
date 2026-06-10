@@ -67,7 +67,7 @@ run "zero_ttl_cold"            "❄ COLD"       0              0
 # ── Progress bar test ──────────────────────────────────────────────────────────
 
 tmp_bar=$(mktemp)
-echo "$(date +%s)" > "$tmp_bar"
+date +%s > "$tmp_bar"
 bar_out=$(CONFIG_FILE=/dev/null TS_FILE="$tmp_bar" TTL=300 SHOW_BAR=1 bash "$SCRIPT" 2>&1 || true)
 rm -f "$tmp_bar"
 if [[ "$bar_out" == "🔥 HOT ["*"]"* ]]; then
@@ -98,7 +98,7 @@ fi
 # ── Zero-width bar edge case ──────────────────────────────────────────────────
 
 tmp_bar=$(mktemp)
-echo "$(date +%s)" > "$tmp_bar"
+date +%s > "$tmp_bar"
 zero_bar_out=$(CONFIG_FILE=/dev/null TS_FILE="$tmp_bar" TTL=300 SHOW_BAR=1 BAR_WIDTH=0 bash "$SCRIPT" 2>&1 || true)
 rm -f "$tmp_bar"
 if [[ "$zero_bar_out" == "🔥 HOT 5:00" ]]; then
